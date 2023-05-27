@@ -119,6 +119,8 @@ def doPlayMod():
 		        dbid = sys.listitem.getfilename()
 		    except AttributeError:
 		       dbid = sys.listitem.getPath()
+	#elif xbmc.getInfoLabel('Container.ListItem.Label'):
+	#	dbid = requests.utils.quote(xbmc.getInfoLabel('Container.ListItem.Label'))
 	else:
 		if xbmc.getInfoLabel('ListItem.Episode') and xbmc.getInfoLabel('ListItem.TVSHowTitle') and xbmc.getInfoLabel('ListItem.Season'):
 			dbid = '{} s{:02d}e{:02d}'.format(xbmc.getInfoLabel('ListItem.TVSHowTitle'), int(xbmc.getInfoLabel('ListItem.Season')), int(xbmc.getInfoLabel('ListItem.Episode')))
@@ -132,7 +134,8 @@ def doPlayMod():
 			dbid = '{} ({})'.format(xbmc.getInfoLabel('ListItem.Title'), xbmc.getInfoLabel('ListItem.Year'))
 			dbid = requests.utils.quote(dbid)
 		else:
-			dbid = requests.utils.quote(sys.listitem.getLabel()) if sys.listitem.getLabel() else requests.utils.quote(xbmc.getInfoLabel('ListItem.Label'))
+			#dbid = requests.utils.quote(sys.listitem.getLabel()) if sys.listitem.getLabel() else requests.utils.quote(xbmc.getInfoLabel('ListItem.Label'))
+			dbid = requests.utils.quote(xbmc.getInfoLabel('ListItem.Label')) if xbmc.getInfoLabel('ListItem.Label') else requests.utils.quote(sys.listitem.getLabel())
 	url = "plugin://plugin.video.elementum/context/media/%s/%s/play" % (mediatype, dbid)
 	xbmc.Player().play(url)
 		
