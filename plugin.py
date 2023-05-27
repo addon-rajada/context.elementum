@@ -109,6 +109,33 @@ def doAssign():
 
     xbmc.Player().play(url)
 
+def doPlayMod():
+	mediatype = "movie"
+	dbid = None
+	if xbmc.getInfoLabel('ListItem.DBID'):
+		dbid = xbmc.getInfoLabel('ListItem.DBID')
+		if not dbid.isdigit():
+		    try:
+		        dbid = sys.listitem.getfilename()
+		    except AttributeError:
+		       dbid = sys.listitem.getPath()
+	else:
+		if xbmc.getInfoLabel('ListItem.Episode') and xbmc.getInfoLabel('ListItem.TVSHowTitle') and xbmc.getInfoLabel('ListItem.Season'):
+			dbid = '{} s{:02d}e{:02d}'.format(xbmc.getInfoLabel('ListItem.TVSHowTitle'), int(xbmc.getInfoLabel('ListItem.Season')), int(xbmc.getInfoLabel('ListItem.Episode')))
+			dbid = requests.utils.quote(dbid)
+			mediatype = "episode"
+		elif xbmc.getInfoLabel('ListItem.TVSHowTitle') and xbmc.getInfoLabel('ListItem.Season'):
+			dbid = '{} s{:02d}'.format(xbmc.getInfoLabel('ListItem.TVSHowTitle'), int(xbmc.getInfoLabel('ListItem.Season')))
+			dbid = requests.utils.quote(dbid)
+			mediatype = "season"
+		elif xbmc.getInfoLabel('ListItem.Title') and xbmc.getInfoLabel('ListItem.Year'):
+			dbid = '{} ({})'.format(xbmc.getInfoLabel('ListItem.Title'), xbmc.getInfoLabel('ListItem.Year'))
+			dbid = requests.utils.quote(dbid)
+		else:
+			dbid = requests.utils.quote(sys.listitem.getLabel()) if sys.listitem.getLabel() else requests.utils.quote(xbmc.getInfoLabel('ListItem.Label'))
+	url = "plugin://plugin.video.elementum/context/media/%s/%s/play" % (mediatype, dbid)
+	xbmc.Player().play(url)
+		
 
 def doPlay():
     dbid = getDbId()
