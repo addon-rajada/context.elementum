@@ -112,30 +112,58 @@ def doAssign():
 def doPlayMod():
 	mediatype = "movie"
 	dbid = None
+	use_label = False
+	debug_flag = False
+	dialog = xbmcgui.Dialog()
+
 	if xbmc.getInfoLabel('ListItem.DBID'):
 		dbid = xbmc.getInfoLabel('ListItem.DBID')
-		if not dbid.isdigit():
-		    try:
-		        dbid = sys.listitem.getfilename()
-		    except AttributeError:
-		       dbid = sys.listitem.getPath()
-	#elif xbmc.getInfoLabel('Container.ListItem.Label'):
-	#	dbid = requests.utils.quote(xbmc.getInfoLabel('Container.ListItem.Label'))
+		if debug_flag: dialog.notification("Context Menu", "DBID - %s" % dbid)
 	else:
+		use_label = True
+	
+	#elif xbmc.getInfoLabel('Container({0}).ListItem.Label'.format(xbmcgui.Window(xbmcgui.getCurrentWindowId()).getFocusId())):
+	#	dbid = xbmc.getInfoLabel('Container({0}).ListItem.Label'.format(xbmcgui.Window(xbmcgui.getCurrentWindowId()).getFocusId()))
+	#	dbid = requests.utils.quote(dbid)
+	#	if debug_flag: dialog.notification("Context Menu", "Container - %s" % dbid)
+	
+	if use_label:
 		if xbmc.getInfoLabel('ListItem.Episode') and xbmc.getInfoLabel('ListItem.TVSHowTitle') and xbmc.getInfoLabel('ListItem.Season'):
 			dbid = '{} s{:02d}e{:02d}'.format(xbmc.getInfoLabel('ListItem.TVSHowTitle'), int(xbmc.getInfoLabel('ListItem.Season')), int(xbmc.getInfoLabel('ListItem.Episode')))
-			dbid = requests.utils.quote(dbid)
 			mediatype = "episode"
+			if debug_flag: dialog.notification("Context Menu", "Episode - %s" % dbid)
 		elif xbmc.getInfoLabel('ListItem.TVSHowTitle') and xbmc.getInfoLabel('ListItem.Season'):
 			dbid = '{} s{:02d}'.format(xbmc.getInfoLabel('ListItem.TVSHowTitle'), int(xbmc.getInfoLabel('ListItem.Season')))
-			dbid = requests.utils.quote(dbid)
 			mediatype = "season"
+			if debug_flag: dialog.notification("Context Menu", "Season - %s" % dbid)
 		elif xbmc.getInfoLabel('ListItem.Title') and xbmc.getInfoLabel('ListItem.Year'):
 			dbid = '{} ({})'.format(xbmc.getInfoLabel('ListItem.Title'), xbmc.getInfoLabel('ListItem.Year'))
-			dbid = requests.utils.quote(dbid)
+			if debug_flag: dialog.notification("Context Menu", "Movie - %s" % dbid)
 		else:
-			#dbid = requests.utils.quote(sys.listitem.getLabel()) if sys.listitem.getLabel() else requests.utils.quote(xbmc.getInfoLabel('ListItem.Label'))
-			dbid = requests.utils.quote(xbmc.getInfoLabel('ListItem.Label')) if xbmc.getInfoLabel('ListItem.Label') else requests.utils.quote(sys.listitem.getLabel())
+			#dbid = sys.listitem.getLabel() if sys.listitem.getLabel() else xbmc.getInfoLabel('ListItem.Label')
+			dbid = xbmc.getInfoLabel('ListItem.Label') if xbmc.getInfoLabel('ListItem.Label') else sys.listitem.getLabel()
+			if debug_flag: dialog.notification("Context Menu", "Last Case - %s" % dbid)
+			if debug_flag: log.debug("[COLOR red]Context Menu Last Case Query[/COLOR]: %s" % dbid.replace('[COLOR','opencolor').replace('[/COLOR]','closecolor'))
+
+			# -> regex for colored title processing. must keep same order <-
+			dbid = re.sub(r'(\[color[\sa-zA-Z0-9]*\]\s?\(\s?[0-9]*\s?(links|opções)\s?\)\s?\[\/color\])', '', dbid, flags=re.IGNORECASE) # fix for CineRoom folders
+			if debug_flag: log.debug('After CineRoom Folder Check: %s' % dbid)
+
+			is_brazuca_play = re.findall(r'\[color white\](.*)\[\/color\]', dbid, flags=re.IGNORECASE) # fix for BrazucaPlay labels
+			if len(is_brazuca_play) > 0: dbid = re.sub(r'(\[\/color\]\s?-\s?\[color[\sa-zA-Z0-9]*\][0-9.]*)', '', is_brazuca_play[0], flags=re.IGNORECASE)
+			if debug_flag: log.debug('After BrazucaPlay Check: %s' % dbid)
+
+			dbid = re.sub(r'(\[color[\sa-zA-Z0-9]*\]\s?[0-9.]*\s?\[\/color\])', '', dbid, flags=re.IGNORECASE) # fix for CineRoom shows
+			if debug_flag: log.debug('After CineRoom TV Show Check: %s' % dbid)
+
+			dbid = re.sub(r'(\[\/color\])', ' ', dbid, flags=re.IGNORECASE) # fix for color tags
+			if debug_flag: log.debug('After Closing Color Tag Check: %s' % dbid)
+			dbid = re.sub(r'(\[color[\sa-zA-Z0-9]*\])', ' ', dbid, flags=re.IGNORECASE)
+			if debug_flag: log.debug('After Opening Color Tag Check: %s' % dbid)
+
+		dbid = requests.utils.quote(dbid) # quote request
+
+	del dialog
 	url = "plugin://plugin.video.elementum/context/media/%s/%s/play" % (mediatype, dbid)
 	xbmc.Player().play(url)
 		
