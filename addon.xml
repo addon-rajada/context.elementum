@@ -10,7 +10,7 @@
         <menu id="kodi.core.main">
             <menu>
                 <label>32011</label>
-				<item library="context_play_mod.py">
+                <item library="context_play_mod.py">
                     <label>Play (Modded)</label>
                     <visible>True</visible>
                 </item>
@@ -18,8 +18,16 @@
                     <label>Play (Original)</label>
                     <visible>StringCompare(ListItem.dbtype,movie) | StringCompare(ListItem.dbtype,episode) | StringCompare(ListItem.dbtype,season) | String.IsEqual(ListItem.dbtype,movie) | String.IsEqual(ListItem.dbtype,episode) | String.IsEqual(ListItem.dbtype,season)</visible>
                 </item>
+                <item library="context_custom_play.py"> 
+                    <label>Play (Custom)</label>
+                    <visible>StringCompare(ListItem.dbtype,movie) | StringCompare(ListItem.dbtype,episode) | StringCompare(ListItem.dbtype,season) | String.IsEqual(ListItem.dbtype,movie) | String.IsEqual(ListItem.dbtype,episode) | String.IsEqual(ListItem.dbtype,season)</visible>
+                </item>
                 <item library="context_download.py">
                     <label>32012</label>
+                    <visible>StringCompare(ListItem.dbtype,movie) | StringCompare(ListItem.dbtype,episode) | StringCompare(ListItem.dbtype,season) | String.IsEqual(ListItem.dbtype,movie) | String.IsEqual(ListItem.dbtype,episode) | String.IsEqual(ListItem.dbtype,season)</visible>
+                </item>
+                <item library="context_custom_download.py">
+                    <label>Download with custom search query</label>
                     <visible>StringCompare(ListItem.dbtype,movie) | StringCompare(ListItem.dbtype,episode) | StringCompare(ListItem.dbtype,season) | String.IsEqual(ListItem.dbtype,movie) | String.IsEqual(ListItem.dbtype,episode) | String.IsEqual(ListItem.dbtype,season)</visible>
                 </item>
                 <item library="context_assign.py">
